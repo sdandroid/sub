@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -22,7 +23,11 @@ type Server struct {
 
 func main() {
 
-	resp, _ := http.Get("")
+	args := os.Args
+
+	var ServerName = args[1]
+
+	resp, _ := http.Get("https://jmssub.net/members/getsub.php?service=655415&id=65872022-dd11-4b92-81f7-f9db034df686")
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -35,7 +40,6 @@ func main() {
 	split := strings.Split(string(decodeString), "\n")
 
 	var list []Server
-
 	for i := 0; i < len(split); i++ {
 		list = append(list, convert(split[i]))
 	}
@@ -50,13 +54,13 @@ func main() {
 	}
 	cmd := exec.Command("/etc/xray/change.sh")
 	cmd.Env = os.Environ()
-	cmd.Env = append(cmd.Env, "ServerList="+ServerList, "Port="+strconv.Itoa(list[0].Port))
-	err := cmd.Run()
+	cmd.Env = append(cmd.Env, "ServerList="+ServerList, "Port="+strconv.Itoa(list[0].Port), "Service="+ServerName)
+	result, err := cmd.Output()
 	if err != nil {
 		panic(err)
 		return
 	}
-
+	fmt.Println(string(result))
 }
 func convert(str string) Server {
 	index := strings.Index(str, "://")

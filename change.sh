@@ -1,4 +1,9 @@
+```bash
 #!/bin/bash
+
+echo "ServerList:"$ServerList
+echo "$Service:"$Service
+echo "Port:"$Port
 
 array=($(echo $ServerList | tr ";" "\n"))
 idx=1
@@ -8,10 +13,10 @@ cp=0
 for(( i=0;i<${#array[@]};i++))
 do
     nidx=$(($idx+$i))
-    old=$(uci get xray_fw3.@servers[$nidx].server)
+    old=$(uci get $Service.@servers[$nidx].server)
     new=${array[i]}
     if [[ "$old" != "$new" ]];then
-      uci set xray_fw3.@servers[$nidx].server=$new
+      uci set $Service.@servers[$nidx].server=$new
       c=1
     fi
 done;
@@ -19,15 +24,17 @@ done;
 for(( i=0;i<${#array[@]};i++))
 do
     nidx=$(($idx+$i))
-    old=$(uci get xray_fw3.@servers[$nidx].server_port)
+    old=$(uci get $Service.@servers[$nidx].server_port)
     if [[ "$old" != "$Port" ]];then
-      uci set xray_fw3.@servers[$nidx].server_port=$Port
+      uci set $Service.@servers[$nidx].server_port=$Port
       cp=1
     fi
 done;
 
 if [[ $c == 1  ||  $cp == 1 ]];then
-  uci commit xray_fw3
-  /etc/init.d/xray_fw3 restart
+  uci commit $Service
+  /etc/init.d/$Service restart
   echo "end"
 fi
+
+
