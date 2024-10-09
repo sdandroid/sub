@@ -32,7 +32,14 @@ func main() {
 	if len(strings.TrimSpace(url)) == 0 {
 		os.Exit(0)
 	}
-	resp, _ := http.Get(url)
+	resp, e := http.Get(url)
+	if e != nil {
+		panic(e)
+	}
+	if resp == nil {
+		fmt.Println("body is nil")
+		os.Exit(0)
+	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
